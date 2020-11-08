@@ -137,6 +137,7 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteSync (const GpDbQuery&  aQuery,
 GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync (const GpDbQuery& /*aQuery*/,
                                                        const count_t    /*aMinResultRowsCount*/)
 {
+    //https://gist.github.com/ictlyh/6a09e8b3847199c15986d476478072e0
     THROW_GPE_COND_CHECK_M(GpTaskFiberCtx::SIsIntoFiber(), "Async exec available only from inside fiber task"_sv);
     THROW_NOT_IMPLEMENTED();
 }

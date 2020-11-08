@@ -107,7 +107,7 @@ void    GpDbQueryPrepPgSql::FillData (const GpDbQueryValType::EnumT aValueType,
             const bool value = aQuery.Boolean(aValueId);
             iSInt64Vec.emplace_back(0);
             char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
-            *ptr = (value ? 't': 'f');
+            *ptr = (value ? 1: 0);
 
             iValuesPtr.emplace_back(ptr);
             iValuesSize.emplace_back(1);
