@@ -42,6 +42,12 @@ public:
                                                      std::optional<GpRawPtrCharRW>  aOnNullValue) override final;
 
     [[nodiscard]]
+    virtual const GpVector<std::string>&
+                                GetStrArray         (const count_t                      aRowId,
+                                                     const count_t                      aColId,
+                                                     std::optional<std::string_view>    aOnNullValue) const override final;
+
+    [[nodiscard]]
     virtual std::string_view    GetJsonStr          (const count_t                      aRowId,
                                                      const count_t                      aColId,
                                                      std::optional<std::string_view>    aOnNullValue) const override final;

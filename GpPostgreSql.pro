@@ -26,6 +26,7 @@ LIBS += -lpq
 #------------------------------ LIBS END ---------------------------------
 
 SOURCES += \
+	GpDbArrayBuilder.cpp \
 	GpDbConnectionPgSql.cpp \
 	GpDbDriverFactoryPgSql.cpp \
 	GpDbDriverPgSql.cpp \
@@ -33,6 +34,7 @@ SOURCES += \
 	GpDbQueryResPgSql.cpp
 
 HEADERS += \
+    GpDbArrayBuilder.hpp \
     GpDbConnectionPgSql.hpp \
     GpDbDriverFactoryPgSql.hpp \
     GpDbDriverPgSql.hpp \

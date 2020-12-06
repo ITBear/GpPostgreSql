@@ -1,4 +1,5 @@
 #include "GpDbQueryPrepPgSql.hpp"
+#include "GpDbArrayBuilder.hpp"
 
 namespace GPlatform {
 
@@ -19,11 +20,11 @@ void    GpDbQueryPrepPgSql::Prepare (const GpDbQuery& aQuery)
 
     THROW_GPE_COND_CHECK_M(valuesTypesCount == valuesCount, "valuesTypesCount != valuesCount"_sv);
 
+    iOIDs.reserve(valuesCount);
     iValuesPtr.reserve(valuesCount);
     iValuesSize.reserve(valuesCount);
     iValuesIsBinary.reserve(valuesCount);
     iSInt64Vec.reserve(valuesCount);
-    iJsonbDataVec.reserve(valuesCount);
 
     const count_t count = count_t::SMake(valuesCount);
     for (count_t id = 0_cnt; id < count; ++id)
@@ -44,6 +45,7 @@ void    GpDbQueryPrepPgSql::FillData (const GpDbQueryValType::EnumT aValueType,
             const SInt64 value = aQuery.Int64(aValueId);
             iSInt64Vec.emplace_back(BitOps::N2H(value.As<s_int_64>()));
 
+            iOIDs.emplace_back(0);
             iValuesPtr.emplace_back(reinterpret_cast<const char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1)));
             iValuesSize.emplace_back(NumOps::SConvert<int>(sizeof(s_int_64)));
             iValuesIsBinary.emplace_back(1);
@@ -52,14 +54,32 @@ void    GpDbQueryPrepPgSql::FillData (const GpDbQueryValType::EnumT aValueType,
         {
             std::string_view value = aQuery.StrValue(aValueId);
 
+            iOIDs.emplace_back(0);
             iValuesPtr.emplace_back(value.data());
             iValuesSize.emplace_back(NumOps::SConvert<int>(value.size()));
+            iValuesIsBinary.emplace_back(1);
+        } break;
+        case GpDbQueryValType::STRING_VALUE_ARRAY:
+        {
+            const GpVector<std::string>& value = aQuery.StrValueArray(aValueId);
+
+            auto[oid, arrayData] = GpDbArrayBuilder::SBuild(value);
+
+            const std::byte*    dataPtr     = arrayData.data();
+            const size_t        dataSize    = arrayData.size();
+
+            iBinaryDataVec.emplace_back(std::move(arrayData));
+
+            iOIDs.emplace_back(oid);
+            iValuesPtr.emplace_back(reinterpret_cast<const char*>(dataPtr));
+            iValuesSize.emplace_back(NumOps::SConvert<int>(dataSize));
             iValuesIsBinary.emplace_back(1);
         } break;
         case GpDbQueryValType::STRING_NAME:
         {
             std::string_view value = aQuery.StrName(aValueId);
 
+            iOIDs.emplace_back(0);
             iValuesPtr.emplace_back(value.data());
             iValuesSize.emplace_back(NumOps::SConvert<int>(value.size()));
             iValuesIsBinary.emplace_back(1);
@@ -79,9 +99,10 @@ void    GpDbQueryPrepPgSql::FillData (const GpDbQueryValType::EnumT aValueType,
             const std::byte*    dataPtr     = jsonbData.data();
             const size_t        dataSize    = jsonbData.size();
 
-            iJsonbDataVec.emplace_back(std::move(jsonbData));
+            iBinaryDataVec.emplace_back(std::move(jsonbData));
 
             //---------------------------
+            iOIDs.emplace_back(0);
             iValuesPtr.emplace_back(reinterpret_cast<const char*>(dataPtr));
             iValuesSize.emplace_back(NumOps::SConvert<int>(dataSize));
             iValuesIsBinary.emplace_back(1);
@@ -90,6 +111,7 @@ void    GpDbQueryPrepPgSql::FillData (const GpDbQueryValType::EnumT aValueType,
         {
             const GpUUID& value = aQuery.UUID(aValueId);
 
+            iOIDs.emplace_back(0);
             iValuesPtr.emplace_back(reinterpret_cast<const char*>(value.Data().data()));
             iValuesSize.emplace_back(NumOps::SConvert<int>(sizeof(GpUUID::DataT)));
             iValuesIsBinary.emplace_back(1);
@@ -98,6 +120,7 @@ void    GpDbQueryPrepPgSql::FillData (const GpDbQueryValType::EnumT aValueType,
         {
             const GpBytesArray& value = aQuery.BLOB(aValueId);
 
+            iOIDs.emplace_back(0);
             iValuesPtr.emplace_back(reinterpret_cast<const char*>(value.data()));
             iValuesSize.emplace_back(NumOps::SConvert<int>(value.size()));
             iValuesIsBinary.emplace_back(1);
@@ -109,12 +132,14 @@ void    GpDbQueryPrepPgSql::FillData (const GpDbQueryValType::EnumT aValueType,
             char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
             *ptr = (value ? 1: 0);
 
+            iOIDs.emplace_back(0);
             iValuesPtr.emplace_back(ptr);
             iValuesSize.emplace_back(1);
             iValuesIsBinary.emplace_back(1);
         } break;
         case GpDbQueryValType::NULL_VAL:
         {
+            iOIDs.emplace_back(0);
             iValuesPtr.emplace_back(nullptr);
             iValuesSize.emplace_back(0);
             iValuesIsBinary.emplace_back(1);

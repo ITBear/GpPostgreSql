@@ -118,6 +118,14 @@ GpRawPtrCharRW  GpDbQueryResPgSql::GetStrRW (const count_t                  aRow
     return GpRawPtrCharRW(const_cast<char*>(str.data()), str.size());
 }
 
+const GpVector<std::string>&    GpDbQueryResPgSql::GetStrArray (const count_t                   /*aRowId*/,
+                                                                const count_t                   /*aColId*/,
+                                                                std::optional<std::string_view> /*aOnNullValue*/) const
+{
+    //TODO: implement
+    THROW_NOT_IMPLEMENTED();
+}
+
 std::string_view    GpDbQueryResPgSql::GetJsonStr (const count_t                    aRowId,
                                                    const count_t                    aColId,
                                                    std::optional<std::string_view>  aOnNullValue) const
