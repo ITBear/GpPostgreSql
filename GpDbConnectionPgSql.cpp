@@ -21,8 +21,11 @@ GpDbConnectionPgSql::IsolationLevelNamesT   GpDbConnectionPgSql::sIsolationLevel
     "READ UNCOMMITTED"_sv
 };
 
-GpDbConnectionPgSql::GpDbConnectionPgSql (PGconn*       aPgConn,
-                                          const ModeTE  aMode) noexcept:
+GpDbConnectionPgSql::GpDbConnectionPgSql
+(
+    PGconn*         aPgConn,
+    const ModeTE    aMode
+) noexcept:
 GpDbConnection(StatusTE::CONNECTED, aMode),
 iPgConn(aPgConn)
 {
@@ -38,8 +41,11 @@ void    GpDbConnectionPgSql::Close (void)
     ClosePgConn();
 }
 
-GpDbQueryRes::SP    GpDbConnectionPgSql::Execute (const GpDbQuery&  aQuery,
-                                                  const count_t     aMinResultRowsCount)
+GpDbQueryRes::SP    GpDbConnectionPgSql::Execute
+(
+    const GpDbQuery&    aQuery,
+    const count_t       aMinResultRowsCount
+)
 {
     //TODO: reimplement with logger listener
     std::cout << "[GpDbConnectionPgSql::Execute]: SQL '" << aQuery.QueryStr() << "'" << std::endl;
@@ -61,8 +67,11 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::Execute (const GpDbQuery&  aQuery,
     }
 }
 
-GpDbQueryRes::SP    GpDbConnectionPgSql::Execute (std::string_view  aSQL,
-                                                  const count_t     aMinResultRowsCount)
+GpDbQueryRes::SP    GpDbConnectionPgSql::Execute
+(
+    std::string_view    aSQL,
+    const count_t       aMinResultRowsCount
+)
 {
     //TODO: reimplement with logger listener
     std::cout << "[GpDbConnectionPgSql::Execute]: SQL '" << aSQL << "'" << std::endl;
@@ -89,8 +98,11 @@ GpDbQuery::SP   GpDbConnectionPgSql::NewQuery (std::string_view aQueryStr) const
     return MakeSP<GpDbQuery>(aQueryStr);
 }
 
-GpDbQuery::SP   GpDbConnectionPgSql::NewQuery (std::string_view                     aQueryStr,
-                                               const GpDbQuery::ValuesTypesVecT&    aValuesTypes) const
+GpDbQuery::SP   GpDbConnectionPgSql::NewQuery
+(
+    std::string_view                    aQueryStr,
+    const GpDbQuery::ValuesTypesVecT&   aValuesTypes
+) const
 {
     return MakeSP<GpDbQuery>(aQueryStr, aValuesTypes);
 }
@@ -110,8 +122,11 @@ void    GpDbConnectionPgSql::OnRollbackTransaction (void)
     Execute("ROLLBACK"_sv, 0_cnt);
 }
 
-GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteSync (const GpDbQuery&  aQuery,
-                                                      const count_t     aMinResultRowsCount)
+GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteSync
+(
+    const GpDbQuery&    aQuery,
+    const count_t       aMinResultRowsCount
+)
 {
     std::string_view    queryStr = aQuery.QueryStr();
     std::string         queryZT;
@@ -122,28 +137,37 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteSync (const GpDbQuery&  aQuery,
     GpDbQueryPrepPgSql queryPrep;
     queryPrep.Prepare(aQuery);
 
-    PGresult* pgResult = PQexecParams(iPgConn,
-                                      queryZT.data(),
-                                      int(aQuery.Values().size()),
-                                      queryPrep.OIDs().data(),
-                                      queryPrep.ValuesPtr().data(),
-                                      queryPrep.ValuesSize().data(),
-                                      queryPrep.ValuesIsBinary().data(),
-                                      int(GpPosrgresQueryResultType::BINARY));
+    PGresult* pgResult = PQexecParams
+    (
+        iPgConn,
+        queryZT.data(),
+        int(aQuery.Values().size()),
+        queryPrep.OIDs().data(),
+        queryPrep.ValuesPtr().data(),
+        queryPrep.ValuesSize().data(),
+        queryPrep.ValuesIsBinary().data(),
+        int(GpPosrgresQueryResultType::BINARY)
+    );
 
     return ProcessResult(pgResult, aMinResultRowsCount);
 }
 
-GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync (const GpDbQuery& /*aQuery*/,
-                                                       const count_t    /*aMinResultRowsCount*/)
+GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
+(
+    const GpDbQuery& /*aQuery*/,
+    const count_t   /*aMinResultRowsCount*/
+)
 {
     //https://gist.github.com/ictlyh/6a09e8b3847199c15986d476478072e0
     THROW_GPE_COND_CHECK_M(GpTaskFiberCtx::SIsIntoFiber(), "Async exec available only from inside fiber task"_sv);
     THROW_NOT_IMPLEMENTED();
 }
 
-GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteSync (std::string_view  aSQL,
-                                                      const count_t     aMinResultRowsCount)
+GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteSync
+(
+    std::string_view    aSQL,
+    const count_t       aMinResultRowsCount
+)
 {
     std::string_view    queryStr = aSQL;
     std::string         queryZT;
@@ -151,27 +175,41 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteSync (std::string_view  aSQL,
     queryZT.reserve(NumOps::SAdd<size_t>(queryStr.length(), 1));
     queryZT.append(queryStr).append("\0"_sv);
 
-    PGresult* pgResult = PQexecParams(iPgConn,
-                                      queryZT.data(),
-                                      0,
-                                      nullptr,
-                                      nullptr,
-                                      nullptr,
-                                      nullptr,
-                                      int(GpPosrgresQueryResultType::BINARY));
+    PGresult* pgResult = PQexecParams
+    (
+        iPgConn,
+        queryZT.data(),
+        0,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        int(GpPosrgresQueryResultType::BINARY)
+    );
 
     return ProcessResult(pgResult,  aMinResultRowsCount);
 }
 
-GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync (std::string_view /*aSQL*/,
-                                                       const count_t    /*aMinResultRowsCount*/)
+GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
+(
+    std::string_view /*aSQL*/,
+    const count_t   /*aMinResultRowsCount*/
+)
 {
+    //Взять сокет из iPgConn
+    //Сделать его неблокирующим
+    //
+
+
     THROW_GPE_COND_CHECK_M(GpTaskFiberCtx::SIsIntoFiber(), "Async exec available only from inside fiber task"_sv);
     THROW_NOT_IMPLEMENTED();
 }
 
-GpDbQueryRes::SP    GpDbConnectionPgSql::ProcessResult (PGresult*       aPgResult,
-                                                        const count_t   aMinResultRowsCount)
+GpDbQueryRes::SP    GpDbConnectionPgSql::ProcessResult
+(
+    PGresult*       aPgResult,
+    const count_t   aMinResultRowsCount
+)
 {
     THROW_GPE_COND_CHECK_M(aPgResult != nullptr, "PGresult is null: "_sv + std::string_view(PQerrorMessage(iPgConn)));
 

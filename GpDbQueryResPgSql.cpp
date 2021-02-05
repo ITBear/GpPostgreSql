@@ -228,11 +228,11 @@ bool    GpDbQueryResPgSql::GetBoolean (const count_t        aRowId,
     std::string_view str(strPtr, strLen);
     const char v = str.at(0);
 
-    return     (v == 't')
+    return     (v == 0x01)
+            || (v == 't')
             || (v == 'T')
             || (v == 'y')
-            || (v == 'Y')
-            || (v == '1');
+            || (v == 'Y');
 }
 
 void    GpDbQueryResPgSql::ClearPgSql (void) noexcept
