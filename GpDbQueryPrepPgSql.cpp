@@ -18,7 +18,11 @@ void    GpDbQueryPrepPgSql::Prepare (const GpDbQuery& aQuery)
     const size_t valuesTypesCount   = valuesTypes.size();
     const size_t valuesCount        = aQuery.Values().size();
 
-    THROW_GPE_COND_CHECK_M(valuesTypesCount == valuesCount, "valuesTypesCount != valuesCount"_sv);
+    THROW_GPE_COND
+    (
+        valuesTypesCount == valuesCount,
+        "valuesTypesCount != valuesCount"_sv
+    );
 
     iOIDs.reserve(valuesCount);
     iValuesPtr.reserve(valuesCount);

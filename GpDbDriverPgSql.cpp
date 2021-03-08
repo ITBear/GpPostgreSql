@@ -40,7 +40,7 @@ PGconn* GpDbDriverPgSql::ConnectSync (std::string_view aConnStr) const
 {
     PGconn* pgConn = PQconnectdb(aConnStr.data());
 
-    THROW_GPE_COND_CHECK_M(pgConn != nullptr, "PQconnectdb return null"_sv);
+    THROW_GPE_COND(pgConn != nullptr, "PQconnectdb return null"_sv);
 
     if (PQstatus(pgConn) == CONNECTION_BAD)
     {
@@ -54,8 +54,13 @@ PGconn* GpDbDriverPgSql::ConnectSync (std::string_view aConnStr) const
 
 PGconn* GpDbDriverPgSql::ConnectAsync (std::string_view /*aConnStr*/) const
 {
-    THROW_GPE_COND_CHECK_M(GpTaskFiberCtx::SIsIntoFiber(), "Async connection available only from inside fiber task"_sv);
-    THROW_NOT_IMPLEMENTED();
+    THROW_GPE_COND
+    (
+        GpTaskFiberCtx::SIsIntoFiber(),
+        "Async connection available only from inside fiber task"_sv
+    );
+
+    THROW_GPE_NOT_IMPLEMENTED();
 
     /*try
     {

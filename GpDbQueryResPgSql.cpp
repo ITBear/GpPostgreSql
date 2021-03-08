@@ -5,7 +5,7 @@ namespace GPlatform {
 GpDbQueryResPgSql::GpDbQueryResPgSql (PGresult* aPgResult):
 iPgResult(aPgResult)
 {
-    THROW_GPE_COND_CHECK_M(iPgResult != nullptr, "Result is nullptr"_sv);
+    THROW_GPE_COND(iPgResult != nullptr, "Result is nullptr"_sv);
 
     static_assert(PGRES_EMPTY_QUERY     == 0, "PGRES_EMPTY_QUERY    != 0");
     static_assert(PGRES_COMMAND_OK      == 1, "PGRES_COMMAND_OK     != 1");
@@ -68,14 +68,21 @@ SInt64  GpDbQueryResPgSql::GetInt64 (const count_t          aRowId,
 
     if (PQgetisnull(iPgResult, rowId, colId))
     {
-        THROW_GPE_COND_CHECK_M(aOnNullValue.has_value(), "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv);
+        THROW_GPE_COND
+        (
+            aOnNullValue.has_value(),
+            "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv
+        );
         return aOnNullValue.value();
     }
 
     const int len = PQgetlength(iPgResult, rowId, colId);
 
-    THROW_GPE_COND_CHECK_M(size_t(len) == sizeof(s_int_64),
-                           "s_int_64 length must be 8 bytes"_sv);
+    THROW_GPE_COND
+    (
+        size_t(len) == sizeof(s_int_64),
+        "s_int_64 length must be 8 bytes"_sv
+    );
 
     s_int_64 value = BitOps::N2H(*reinterpret_cast<const s_int_64*>(PQgetvalue(iPgResult, rowId, colId)));
     return SInt64::SMake(value);
@@ -90,7 +97,11 @@ std::string_view    GpDbQueryResPgSql::GetStr (const count_t                    
 
     if (PQgetisnull(iPgResult, rowId, colId))
     {
-        THROW_GPE_COND_CHECK_M(aOnNullValue.has_value(), "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv);
+        THROW_GPE_COND
+        (
+            aOnNullValue.has_value(),
+            "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv
+        );
         return aOnNullValue.value();
     }
 
@@ -123,7 +134,7 @@ const GpVector<std::string>&    GpDbQueryResPgSql::GetStrArray (const count_t   
                                                                 std::optional<std::string_view> /*aOnNullValue*/) const
 {
     //TODO: implement
-    THROW_NOT_IMPLEMENTED();
+    THROW_GPE_NOT_IMPLEMENTED();
 }
 
 std::string_view    GpDbQueryResPgSql::GetJsonStr (const count_t                    aRowId,
@@ -132,11 +143,17 @@ std::string_view    GpDbQueryResPgSql::GetJsonStr (const count_t                
 {
     std::string_view str = GetStr(aRowId, aColId, aOnNullValue);
 
-    THROW_GPE_COND_CHECK_M(str.length() >= 3,
-                           "json data length must be >= 3 bytes"_sv);
+    THROW_GPE_COND
+    (
+        str.length() >= 3,
+        "json data length must be >= 3 bytes"_sv
+    );
 
-    THROW_GPE_COND_CHECK_M(std::bit_cast<u_int_8>(str.data()[0]) == 1,
-                           "Wrong pgJson format version"_sv);
+    THROW_GPE_COND
+    (
+        std::bit_cast<u_int_8>(str.data()[0]) == 1,
+        "Wrong pgJson format version"_sv
+    );
 
     return str.substr(1, str.length() - 1);
 }
@@ -168,7 +185,11 @@ GpUUID  GpDbQueryResPgSql::GetUUID (const count_t           aRowId,
 
     if (PQgetisnull(iPgResult, rowId, colId))
     {
-        THROW_GPE_COND_CHECK_M(aOnNullValue.has_value(), "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv);
+        THROW_GPE_COND
+        (
+            aOnNullValue.has_value(),
+            "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv
+        );
         return aOnNullValue.value();
     }
 
@@ -177,8 +198,11 @@ GpUUID  GpDbQueryResPgSql::GetUUID (const count_t           aRowId,
 
     std::string_view str(strPtr, strLen);
 
-    THROW_GPE_COND_CHECK_M(str.length() == sizeof(GpUUID::DataT),
-                           "uuid length must be 16 bytes"_sv);
+    THROW_GPE_COND
+    (
+        str.length() == sizeof(GpUUID::DataT),
+        "uuid length must be 16 bytes"_sv
+    );
 
     GpUUID uuid;
     std::memcpy(uuid.Data().data(),
@@ -197,7 +221,11 @@ GpRawPtrByteR   GpDbQueryResPgSql::GetBLOB (const count_t                   aRow
 
     if (PQgetisnull(iPgResult, rowId, colId))
     {
-        THROW_GPE_COND_CHECK_M(aOnNullValue.has_value(), "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv);
+        THROW_GPE_COND
+        (
+            aOnNullValue.has_value(),
+            "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv
+        );
         return aOnNullValue.value();
     }
 
@@ -218,7 +246,11 @@ bool    GpDbQueryResPgSql::GetBoolean (const count_t        aRowId,
 
     if (PQgetisnull(iPgResult, rowId, colId))
     {
-        THROW_GPE_COND_CHECK_M(aOnNullValue.has_value(), "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv);
+        THROW_GPE_COND
+        (
+            aOnNullValue.has_value(),
+            "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv
+        );
         return aOnNullValue.value();
     }
 

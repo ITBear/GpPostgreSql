@@ -159,8 +159,13 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
 )
 {
     //https://gist.github.com/ictlyh/6a09e8b3847199c15986d476478072e0
-    THROW_GPE_COND_CHECK_M(GpTaskFiberCtx::SIsIntoFiber(), "Async exec available only from inside fiber task"_sv);
-    THROW_NOT_IMPLEMENTED();
+    THROW_GPE_COND
+    (
+        GpTaskFiberCtx::SIsIntoFiber(),
+        "Async exec available only from inside fiber task"_sv
+    );
+
+    THROW_GPE_NOT_IMPLEMENTED();
 }
 
 GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteSync
@@ -200,9 +205,13 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
     //Сделать его неблокирующим
     //
 
+    THROW_GPE_COND
+    (
+        GpTaskFiberCtx::SIsIntoFiber(),
+        "Async exec available only from inside fiber task"_sv
+    );
 
-    THROW_GPE_COND_CHECK_M(GpTaskFiberCtx::SIsIntoFiber(), "Async exec available only from inside fiber task"_sv);
-    THROW_NOT_IMPLEMENTED();
+    THROW_GPE_NOT_IMPLEMENTED();
 }
 
 GpDbQueryRes::SP    GpDbConnectionPgSql::ProcessResult
@@ -211,7 +220,11 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ProcessResult
     const count_t   aMinResultRowsCount
 )
 {
-    THROW_GPE_COND_CHECK_M(aPgResult != nullptr, "PGresult is null: "_sv + std::string_view(PQerrorMessage(iPgConn)));
+    THROW_GPE_COND
+    (
+        aPgResult != nullptr,
+        "PGresult is null: "_sv + std::string_view(PQerrorMessage(iPgConn))
+    );
 
     const ExecStatusType    pgResStatus = PQresultStatus(aPgResult);
     GpDbQueryResPgSql::SP   res;
@@ -283,9 +296,9 @@ void    GpDbConnectionPgSql::ClosePgConn (void) noexcept
 {
     if (Mode() == ModeTE::ASYNC)
     {
-        std::cout << "[GpDbConnectionPgSql::ClosePgConn]: Mode() == ModeTE::ASYNC. THROW_NOT_IMPLEMENTED..." << std::endl;
+        std::cout << "[GpDbConnectionPgSql::ClosePgConn]: Mode() == ModeTE::ASYNC. THROW_GPE_NOT_IMPLEMENTED..." << std::endl;
         //TODO: implement
-        THROW_NOT_IMPLEMENTED();
+        THROW_GPE_NOT_IMPLEMENTED();
     }
 
     PQfinish(iPgConn);
