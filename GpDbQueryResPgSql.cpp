@@ -59,9 +59,12 @@ count_t GpDbQueryResPgSql::ColumnsCount (void) const
     return count_t::SMake(columnsCount);
 }
 
-SInt64  GpDbQueryResPgSql::GetInt64 (const count_t          aRowId,
-                                     const count_t          aColId,
-                                     std::optional<SInt64>  aOnNullValue) const
+SInt64  GpDbQueryResPgSql::GetInt64
+(
+    const count_t           aRowId,
+    const count_t           aColId,
+    std::optional<SInt64>   aOnNullValue
+) const
 {
     const int rowId = aRowId.As<int>();
     const int colId = aColId.As<int>();
@@ -71,7 +74,7 @@ SInt64  GpDbQueryResPgSql::GetInt64 (const count_t          aRowId,
         THROW_GPE_COND
         (
             aOnNullValue.has_value(),
-            "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv
+            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
         );
         return aOnNullValue.value();
     }
@@ -88,9 +91,12 @@ SInt64  GpDbQueryResPgSql::GetInt64 (const count_t          aRowId,
     return SInt64::SMake(value);
 }
 
-std::string_view    GpDbQueryResPgSql::GetStr (const count_t                    aRowId,
-                                               const count_t                    aColId,
-                                               std::optional<std::string_view>  aOnNullValue) const
+std::string_view    GpDbQueryResPgSql::GetStr
+(
+    const count_t                   aRowId,
+    const count_t                   aColId,
+    std::optional<std::string_view> aOnNullValue
+) const
 {
     const int rowId = aRowId.As<int>();
     const int colId = aColId.As<int>();
@@ -100,7 +106,7 @@ std::string_view    GpDbQueryResPgSql::GetStr (const count_t                    
         THROW_GPE_COND
         (
             aOnNullValue.has_value(),
-            "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv
+            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
         );
         return aOnNullValue.value();
     }
@@ -111,9 +117,12 @@ std::string_view    GpDbQueryResPgSql::GetStr (const count_t                    
     return std::string_view(strPtr, strLen);
 }
 
-GpRawPtrCharRW  GpDbQueryResPgSql::GetStrRW (const count_t                  aRowId,
-                                             const count_t                  aColId,
-                                             std::optional<GpRawPtrCharRW>  aOnNullValue)
+GpRawPtrCharRW  GpDbQueryResPgSql::GetStrRW
+(
+    const count_t                   aRowId,
+    const count_t                   aColId,
+    std::optional<GpRawPtrCharRW>   aOnNullValue
+)
 {
     std::optional<std::string_view> defaultValue;
 
@@ -122,24 +131,33 @@ GpRawPtrCharRW  GpDbQueryResPgSql::GetStrRW (const count_t                  aRow
         defaultValue = aOnNullValue.value().AsStringView();
     }
 
-    std::string_view str = std::as_const(*this).GetStr(aRowId,
-                                                       aColId,
-                                                       defaultValue);
+    std::string_view str = std::as_const(*this).GetStr
+    (
+        aRowId,
+        aColId,
+        defaultValue
+    );
 
     return GpRawPtrCharRW(const_cast<char*>(str.data()), str.size());
 }
 
-const GpVector<std::string>&    GpDbQueryResPgSql::GetStrArray (const count_t                   /*aRowId*/,
-                                                                const count_t                   /*aColId*/,
-                                                                std::optional<std::string_view> /*aOnNullValue*/) const
+const GpVector<std::string>&    GpDbQueryResPgSql::GetStrArray
+(
+    const count_t                   /*aRowId*/,
+    const count_t                   /*aColId*/,
+    std::optional<std::string_view> /*aOnNullValue*/
+) const
 {
     //TODO: implement
     THROW_GPE_NOT_IMPLEMENTED();
 }
 
-std::string_view    GpDbQueryResPgSql::GetJsonStr (const count_t                    aRowId,
-                                                   const count_t                    aColId,
-                                                   std::optional<std::string_view>  aOnNullValue) const
+std::string_view    GpDbQueryResPgSql::GetJsonStr
+(
+    const count_t                   aRowId,
+    const count_t                   aColId,
+    std::optional<std::string_view> aOnNullValue
+) const
 {
     std::string_view str = GetStr(aRowId, aColId, aOnNullValue);
 
@@ -158,9 +176,12 @@ std::string_view    GpDbQueryResPgSql::GetJsonStr (const count_t                
     return str.substr(1, str.length() - 1);
 }
 
-GpRawPtrCharRW  GpDbQueryResPgSql::GetJsonStrRW (const count_t                  aRowId,
-                                                 const count_t                  aColId,
-                                                 std::optional<GpRawPtrCharRW>  aOnNullValue)
+GpRawPtrCharRW  GpDbQueryResPgSql::GetJsonStrRW
+(
+    const count_t                   aRowId,
+    const count_t                   aColId,
+    std::optional<GpRawPtrCharRW>   aOnNullValue
+)
 {
     std::optional<std::string_view> defaultValue;
 
@@ -169,16 +190,22 @@ GpRawPtrCharRW  GpDbQueryResPgSql::GetJsonStrRW (const count_t                  
         defaultValue = aOnNullValue.value().AsStringView();
     }
 
-    std::string_view str = std::as_const(*this).GetJsonStr(aRowId,
-                                                           aColId,
-                                                           defaultValue);
+    std::string_view str = std::as_const(*this).GetJsonStr
+    (
+        aRowId,
+        aColId,
+        defaultValue
+    );
 
     return GpRawPtrCharRW(const_cast<char*>(str.data()), str.size());
 }
 
-GpUUID  GpDbQueryResPgSql::GetUUID (const count_t           aRowId,
-                                    const count_t           aColId,
-                                    std::optional<GpUUID>   aOnNullValue) const
+GpUUID  GpDbQueryResPgSql::GetUUID
+(
+    const count_t           aRowId,
+    const count_t           aColId,
+    std::optional<GpUUID>   aOnNullValue
+) const
 {
     const int rowId = aRowId.As<int>();
     const int colId = aColId.As<int>();
@@ -188,7 +215,7 @@ GpUUID  GpDbQueryResPgSql::GetUUID (const count_t           aRowId,
         THROW_GPE_COND
         (
             aOnNullValue.has_value(),
-            "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv
+            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
         );
         return aOnNullValue.value();
     }
@@ -212,9 +239,12 @@ GpUUID  GpDbQueryResPgSql::GetUUID (const count_t           aRowId,
     return uuid;
 }
 
-GpRawPtrByteR   GpDbQueryResPgSql::GetBLOB (const count_t                   aRowId,
-                                            const count_t                   aColId,
-                                            std::optional<GpRawPtrByteR>    aOnNullValue) const
+GpRawPtrByteR   GpDbQueryResPgSql::GetBLOB
+(
+    const count_t                   aRowId,
+    const count_t                   aColId,
+    std::optional<GpRawPtrByteR>    aOnNullValue
+) const
 {
     const int rowId = aRowId.As<int>();
     const int colId = aColId.As<int>();
@@ -224,7 +254,7 @@ GpRawPtrByteR   GpDbQueryResPgSql::GetBLOB (const count_t                   aRow
         THROW_GPE_COND
         (
             aOnNullValue.has_value(),
-            "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv
+            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
         );
         return aOnNullValue.value();
     }
@@ -237,9 +267,12 @@ GpRawPtrByteR   GpDbQueryResPgSql::GetBLOB (const count_t                   aRow
     return GpRawPtrCharR(str.data(), str.length());
 }
 
-bool    GpDbQueryResPgSql::GetBoolean (const count_t        aRowId,
-                                       const count_t        aColId,
-                                       std::optional<bool>  aOnNullValue) const
+bool    GpDbQueryResPgSql::GetBoolean
+(
+    const count_t       aRowId,
+    const count_t       aColId,
+    std::optional<bool> aOnNullValue
+) const
 {
     const int rowId = aRowId.As<int>();
     const int colId = aColId.As<int>();
@@ -249,7 +282,7 @@ bool    GpDbQueryResPgSql::GetBoolean (const count_t        aRowId,
         THROW_GPE_COND
         (
             aOnNullValue.has_value(),
-            "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv
+            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
         );
         return aOnNullValue.value();
     }

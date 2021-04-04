@@ -223,7 +223,7 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ProcessResult
     THROW_GPE_COND
     (
         aPgResult != nullptr,
-        "PGresult is null: "_sv + std::string_view(PQerrorMessage(iPgConn))
+        [&](){return "PGresult is null: "_sv + std::string_view(PQerrorMessage(iPgConn));}
     );
 
     const ExecStatusType    pgResStatus = PQresultStatus(aPgResult);
@@ -236,7 +236,7 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ProcessResult
         {
             if (aMinResultRowsCount > 0_cnt)
             {
-                THROW_DBE(GpDbExceptionCode::EMPTY_QUERY_RES);
+                THROW_DBE(GpDbExceptionCode::EMPTY_QUERY_RES, ""_sv);
             } else
             {
                 res = MakeSP<GpDbQueryResPgSql>(aPgResult);
@@ -285,7 +285,7 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ProcessResult
     {
         if (res.VCn().RowsCount() < aMinResultRowsCount)
         {
-            THROW_DBE(GpDbExceptionCode::EMPTY_QUERY_RES);
+            THROW_DBE(GpDbExceptionCode::EMPTY_QUERY_RES, ""_sv);
         }
     }
 
