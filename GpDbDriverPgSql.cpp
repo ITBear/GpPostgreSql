@@ -12,8 +12,11 @@ GpDbDriverPgSql::~GpDbDriverPgSql (void) noexcept
 {
 }
 
-GpDbConnection::SP  GpDbDriverPgSql::NewConnection (const GpDbConnectionMode::EnumT aMode,
-                                                    std::string_view                aConnStr) const
+GpDbConnection::SP  GpDbDriverPgSql::NewConnection
+(
+    const GpDbConnectionMode::EnumT aMode,
+    std::string_view                aConnStr
+) const
 {
     GpDbConnection::SP connection;
 
@@ -56,7 +59,7 @@ PGconn* GpDbDriverPgSql::ConnectAsync (std::string_view /*aConnStr*/) const
 {
     THROW_GPE_COND
     (
-        GpTaskFiberCtx::SIsIntoFiber(),
+        GpTaskFiber::SIsIntoFiber(),
         "Async connection available only from inside fiber task"_sv
     );
 
@@ -114,7 +117,7 @@ PGconn* GpDbDriverPgSql::ConnectAsync (std::string_view /*aConnStr*/) const
             }
 
             //Return to waiting
-            GpTaskCoroutineCtx::SYeld(GpTaskExecRes::WAITING);
+            GpTaskCoroutineCtx::SYield(GpTaskExecRes::WAITING);
         } while(true);
     } catch (...)
     {

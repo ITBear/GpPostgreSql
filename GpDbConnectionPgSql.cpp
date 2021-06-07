@@ -161,7 +161,7 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
     //https://gist.github.com/ictlyh/6a09e8b3847199c15986d476478072e0
     THROW_GPE_COND
     (
-        GpTaskFiberCtx::SIsIntoFiber(),
+        GpTaskFiber::SIsIntoFiber(),
         "Async exec available only from inside fiber task"_sv
     );
 
@@ -207,7 +207,7 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
 
     THROW_GPE_COND
     (
-        GpTaskFiberCtx::SIsIntoFiber(),
+        GpTaskFiber::SIsIntoFiber(),
         "Async exec available only from inside fiber task"_sv
     );
 

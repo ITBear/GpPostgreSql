@@ -59,6 +59,70 @@ count_t GpDbQueryResPgSql::ColumnsCount (void) const
     return count_t::SMake(columnsCount);
 }
 
+SInt16  GpDbQueryResPgSql::GetInt16
+(
+    const count_t           aRowId,
+    const count_t           aColId,
+    std::optional<SInt16>   aOnNullValue
+) const
+{
+    const int rowId = aRowId.As<int>();
+    const int colId = aColId.As<int>();
+
+    if (PQgetisnull(iPgResult, rowId, colId))
+    {
+        THROW_GPE_COND
+        (
+            aOnNullValue.has_value(),
+            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
+        );
+        return aOnNullValue.value();
+    }
+
+    const int len = PQgetlength(iPgResult, rowId, colId);
+
+    THROW_GPE_COND
+    (
+        size_t(len) == sizeof(s_int_16),
+        "s_int_16 length must be 8 bytes"_sv
+    );
+
+    s_int_16 value = BitOps::N2H(*reinterpret_cast<const s_int_16*>(PQgetvalue(iPgResult, rowId, colId)));
+    return SInt16::SMake(value);
+}
+
+SInt32  GpDbQueryResPgSql::GetInt32
+(
+    const count_t           aRowId,
+    const count_t           aColId,
+    std::optional<SInt32>   aOnNullValue
+) const
+{
+    const int rowId = aRowId.As<int>();
+    const int colId = aColId.As<int>();
+
+    if (PQgetisnull(iPgResult, rowId, colId))
+    {
+        THROW_GPE_COND
+        (
+            aOnNullValue.has_value(),
+            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
+        );
+        return aOnNullValue.value();
+    }
+
+    const int len = PQgetlength(iPgResult, rowId, colId);
+
+    THROW_GPE_COND
+    (
+        size_t(len) == sizeof(s_int_32),
+        "s_int_32 length must be 8 bytes"_sv
+    );
+
+    s_int_32 value = BitOps::N2H(*reinterpret_cast<const s_int_32*>(PQgetvalue(iPgResult, rowId, colId)));
+    return SInt32::SMake(value);
+}
+
 SInt64  GpDbQueryResPgSql::GetInt64
 (
     const count_t           aRowId,

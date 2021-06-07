@@ -5,6 +5,8 @@
 
 namespace GPlatform {
 
+//https://stackoverflow.com/questions/26499266/whats-the-proper-index-for-querying-structures-in-arrays-in-postgres-jsonb/27708358#27708358
+
 class GpDbArrayBuilder
 {
 public:

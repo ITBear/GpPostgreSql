@@ -38,20 +38,78 @@ void    GpDbQueryPrepPgSql::Prepare (const GpDbQuery& aQuery)
     }
 }
 
-void    GpDbQueryPrepPgSql::FillData (const GpDbQueryValType::EnumT aValueType,
-                                      const count_t                 aValueId,
-                                      const GpDbQuery&              aQuery)
+void    GpDbQueryPrepPgSql::FillData
+(
+    const GpDbQueryValType::EnumT   aValueType,
+    const count_t                   aValueId,
+    const GpDbQuery&                aQuery
+)
 {
     switch (aValueType)
     {
-        case GpDbQueryValType::INT_64:
+        case GpDbQueryValType::INT_16:
         {
-            const SInt64 value = aQuery.Int64(aValueId);
-            iSInt64Vec.emplace_back(BitOps::N2H(value.As<s_int_64>()));
+            const s_int_16 value = BitOps::N2H(aQuery.Int16(aValueId).As<s_int_16>());
+            iSInt64Vec.emplace_back(0);
+
+            char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
+            std::memcpy(ptr, &value, sizeof(decltype(value)));
 
             iOIDs.emplace_back(0);
-            iValuesPtr.emplace_back(reinterpret_cast<const char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1)));
-            iValuesSize.emplace_back(NumOps::SConvert<int>(sizeof(s_int_64)));
+            iValuesPtr.emplace_back(ptr);
+            iValuesSize.emplace_back(NumOps::SConvert<int>(sizeof(decltype(value))));
+            iValuesIsBinary.emplace_back(1);
+        } break;
+        case GpDbQueryValType::INT_32:
+        {
+            const s_int_32 value = BitOps::N2H(aQuery.Int32(aValueId).As<s_int_32>());
+            iSInt64Vec.emplace_back(0);
+
+            char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
+            std::memcpy(ptr, &value, sizeof(decltype(value)));
+
+            iOIDs.emplace_back(0);
+            iValuesPtr.emplace_back(ptr);
+            iValuesSize.emplace_back(NumOps::SConvert<int>(sizeof(decltype(value))));
+            iValuesIsBinary.emplace_back(1);
+        } break;
+        case GpDbQueryValType::INT_64:
+        {
+            const s_int_64 value = BitOps::N2H(aQuery.Int64(aValueId).As<s_int_64>());
+            iSInt64Vec.emplace_back(0);
+
+            char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
+            std::memcpy(ptr, &value, sizeof(decltype(value)));
+
+            iOIDs.emplace_back(0);
+            iValuesPtr.emplace_back(ptr);
+            iValuesSize.emplace_back(NumOps::SConvert<int>(sizeof(decltype(value))));
+            iValuesIsBinary.emplace_back(1);
+        } break;
+        case GpDbQueryValType::DOUBLE:
+        {
+            const double value = BitOps::N2H(aQuery.Double(aValueId));
+            iSInt64Vec.emplace_back(0);
+
+            char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
+            std::memcpy(ptr, &value, sizeof(decltype(value)));
+
+            iOIDs.emplace_back(0);
+            iValuesPtr.emplace_back(ptr);
+            iValuesSize.emplace_back(NumOps::SConvert<int>(sizeof(decltype(value))));
+            iValuesIsBinary.emplace_back(1);
+        } break;
+        case GpDbQueryValType::FLOAT:
+        {
+            const float value = BitOps::N2H(aQuery.Float(aValueId));
+            iSInt64Vec.emplace_back(0);
+
+            char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
+            std::memcpy(ptr, &value, sizeof(decltype(value)));
+
+            iOIDs.emplace_back(0);
+            iValuesPtr.emplace_back(ptr);
+            iValuesSize.emplace_back(NumOps::SConvert<int>(sizeof(decltype(value))));
             iValuesIsBinary.emplace_back(1);
         } break;
         case GpDbQueryValType::STRING_VALUE:
