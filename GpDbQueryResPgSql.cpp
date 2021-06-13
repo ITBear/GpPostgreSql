@@ -59,11 +59,11 @@ count_t GpDbQueryResPgSql::ColumnsCount (void) const
     return count_t::SMake(columnsCount);
 }
 
-SInt16  GpDbQueryResPgSql::GetInt16
+s_int_16    GpDbQueryResPgSql::GetInt16
 (
     const count_t           aRowId,
     const count_t           aColId,
-    std::optional<SInt16>   aOnNullValue
+    std::optional<s_int_16> aOnNullValue
 ) const
 {
     const int rowId = aRowId.As<int>();
@@ -88,14 +88,14 @@ SInt16  GpDbQueryResPgSql::GetInt16
     );
 
     s_int_16 value = BitOps::N2H(*reinterpret_cast<const s_int_16*>(PQgetvalue(iPgResult, rowId, colId)));
-    return SInt16::SMake(value);
+    return value;
 }
 
-SInt32  GpDbQueryResPgSql::GetInt32
+s_int_32    GpDbQueryResPgSql::GetInt32
 (
     const count_t           aRowId,
     const count_t           aColId,
-    std::optional<SInt32>   aOnNullValue
+    std::optional<s_int_32> aOnNullValue
 ) const
 {
     const int rowId = aRowId.As<int>();
@@ -120,14 +120,14 @@ SInt32  GpDbQueryResPgSql::GetInt32
     );
 
     s_int_32 value = BitOps::N2H(*reinterpret_cast<const s_int_32*>(PQgetvalue(iPgResult, rowId, colId)));
-    return SInt32::SMake(value);
+    return value;
 }
 
-SInt64  GpDbQueryResPgSql::GetInt64
+s_int_64    GpDbQueryResPgSql::GetInt64
 (
     const count_t           aRowId,
     const count_t           aColId,
-    std::optional<SInt64>   aOnNullValue
+    std::optional<s_int_64> aOnNullValue
 ) const
 {
     const int rowId = aRowId.As<int>();
@@ -152,7 +152,7 @@ SInt64  GpDbQueryResPgSql::GetInt64
     );
 
     s_int_64 value = BitOps::N2H(*reinterpret_cast<const s_int_64*>(PQgetvalue(iPgResult, rowId, colId)));
-    return SInt64::SMake(value);
+    return value;
 }
 
 std::string_view    GpDbQueryResPgSql::GetStr

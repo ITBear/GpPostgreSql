@@ -49,7 +49,7 @@ void    GpDbQueryPrepPgSql::FillData
     {
         case GpDbQueryValType::INT_16:
         {
-            const s_int_16 value = BitOps::N2H(aQuery.Int16(aValueId).As<s_int_16>());
+            const s_int_16 value = BitOps::N2H(aQuery.Int16(aValueId));
             iSInt64Vec.emplace_back(0);
 
             char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
@@ -62,7 +62,7 @@ void    GpDbQueryPrepPgSql::FillData
         } break;
         case GpDbQueryValType::INT_32:
         {
-            const s_int_32 value = BitOps::N2H(aQuery.Int32(aValueId).As<s_int_32>());
+            const s_int_32 value = BitOps::N2H(aQuery.Int32(aValueId));
             iSInt64Vec.emplace_back(0);
 
             char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
@@ -75,7 +75,7 @@ void    GpDbQueryPrepPgSql::FillData
         } break;
         case GpDbQueryValType::INT_64:
         {
-            const s_int_64 value = BitOps::N2H(aQuery.Int64(aValueId).As<s_int_64>());
+            const s_int_64 value = BitOps::N2H(aQuery.Int64(aValueId));
             iSInt64Vec.emplace_back(0);
 
             char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
