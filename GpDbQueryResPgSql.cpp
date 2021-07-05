@@ -5,8 +5,6 @@ namespace GPlatform {
 GpDbQueryResPgSql::GpDbQueryResPgSql (PGresult* aPgResult):
 iPgResult(aPgResult)
 {
-    THROW_GPE_COND(iPgResult != nullptr, "Result is nullptr"_sv);
-
     static_assert(PGRES_EMPTY_QUERY     == 0, "PGRES_EMPTY_QUERY    != 0");
     static_assert(PGRES_COMMAND_OK      == 1, "PGRES_COMMAND_OK     != 1");
     static_assert(PGRES_TUPLES_OK       == 2, "PGRES_TUPLES_OK      != 2");
@@ -22,6 +20,79 @@ iPgResult(aPgResult)
 GpDbQueryResPgSql::~GpDbQueryResPgSql (void) noexcept
 {
     ClearPgSql();
+}
+
+void    GpDbQueryResPgSql::Process
+(
+    const count_t   aMinResultRowsCount,
+    PGconn*         aPgConn
+)
+{
+    THROW_GPE_COND
+    (
+        iPgResult != nullptr,
+        [&](){return "PGresult is null: "_sv + std::string_view(PQerrorMessage(aPgConn));}
+    );
+
+    const ExecStatusType    pgResStatus = PQresultStatus(iPgResult);
+    std::string_view        errMsg;
+
+    switch (pgResStatus)
+    {
+        case PGRES_EMPTY_QUERY:     // empty query string was executed
+        {
+            if (aMinResultRowsCount > 0_cnt)
+            {
+                THROW_DBE(GpDbExceptionCode::QUERY_RESULT_COUNT_LOW, ""_sv);
+            }
+        } break;
+        case PGRES_COMMAND_OK:      // a query command that doesn't return anything was executed properly by the backend
+        case PGRES_TUPLES_OK:       // a query command that returns tuples was executed properly by the backend, PGresult contains the result tuples
+        case PGRES_SINGLE_TUPLE:    // single tuple from larger resultset
+        case PGRES_NONFATAL_ERROR:  // notice or warning message
+        {
+            //OK
+        } break;
+        case PGRES_COPY_OUT:        // copy Out data transfer in progress
+        {
+            errMsg = "copy Out data transfer in progress"_sv;
+        } break;
+        case PGRES_COPY_IN:         // copy In data transfer in progress
+        {
+            errMsg = "copy In data transfer in progress"_sv;
+        } break;
+        case PGRES_BAD_RESPONSE:    // an unexpected response was recv'd from the backend
+        {
+            errMsg = "an unexpected response was recv'd from the backend"_sv;
+        } break;
+        case PGRES_FATAL_ERROR:     // query failed
+        {
+            errMsg = "query failed"_sv;
+        } break;
+        case PGRES_COPY_BOTH:       // Copy In/Out data transfer in progress
+        {
+            errMsg = "Copy In/Out data transfer in progress"_sv;
+        } break;
+        default:
+        {
+            errMsg = "Unknown error"_sv;
+        }
+    }
+
+    if (errMsg.length() > 0)
+    {
+        Clear();
+
+        THROW_GPE(errMsg + ": "_sv + std::string_view(PQerrorMessage(aPgConn)));
+    }
+
+    if (aMinResultRowsCount > 0_cnt)
+    {
+        if (RowsCount() < aMinResultRowsCount)
+        {
+            THROW_DBE(GpDbExceptionCode::QUERY_RESULT_COUNT_LOW, "RowsCount() < aMinResultRowsCount"_sv);
+        }
+    }
 }
 
 void    GpDbQueryResPgSql::Clear (void)

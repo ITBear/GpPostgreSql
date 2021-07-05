@@ -10,13 +10,15 @@ class GpDbDriverPgSql final: public GpDbDriver
 public:
     CLASS_REMOVE_CTRS_EXCEPT_DEFAULT(GpDbDriverPgSql)
     CLASS_DECLARE_DEFAULTS(GpDbDriverPgSql)
+    CLASS_TAG(THREAD_SAFE)
 
 public:
-                                    GpDbDriverPgSql     (void) noexcept;
+                                    GpDbDriverPgSql     (const GpDbConnectionMode::EnumT    aMode,
+                                                         GpIOEventPoller::WP                aEventPoller);
     virtual                         ~GpDbDriverPgSql    (void) noexcept override final;
 
-    virtual GpDbConnection::SP      NewConnection       (const GpDbConnectionMode::EnumT    aMode,
-                                                         std::string_view                   aConnStr) const override final;
+    virtual GpDbConnection::SP      NewConnection       (std::string_view aConnStr) const override final;
+    virtual GpDbQueryPrepared::CSP  Prepare             (GpDbQuery::CSP aQuery) const override final;
 
 private:
     PGconn*                         ConnectSync         (std::string_view aConnStr) const;

@@ -12,9 +12,12 @@ GpDbDriverFactoryPgSql::~GpDbDriverFactoryPgSql (void) noexcept
 {
 }
 
-GpDbDriver::SP  GpDbDriverFactoryPgSql::NewInstance (void) const
+GpDbDriver::SP  GpDbDriverFactoryPgSql::NewInstance
+(
+    const GpDbConnectionMode::EnumT aMode,
+    GpIOEventPoller::WP             aEventPoller) const
 {
-    return MakeSP<GpDbDriverPgSql>();
+    return MakeSP<GpDbDriverPgSql>(aMode, aEventPoller);
 }
 
 }//namespace GPlatform

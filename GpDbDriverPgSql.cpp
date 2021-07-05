@@ -1,34 +1,46 @@
 #include "GpDbDriverPgSql.hpp"
 #include "GpDbConnectionPgSql.hpp"
+#include "GpDbConnectAsyncTask.hpp"
+#include "GpDbQueryPreparedPgSql.hpp"
+
+#include <iostream>
 
 namespace GPlatform {
 
-GpDbDriverPgSql::GpDbDriverPgSql (void) noexcept:
-GpDbDriver("postgresql"_sv)
+static int _GpDbDriverPgSql_counter = 0;
+
+GpDbDriverPgSql::GpDbDriverPgSql
+(
+    const GpDbConnectionMode::EnumT aMode,
+    GpIOEventPoller::WP             aEventPoller
+):
+GpDbDriver("postgresql"_sv, aMode, aEventPoller)
 {
+    _GpDbDriverPgSql_counter++;
+    std::cout << "[GpDbDriverPgSql::GpDbDriverPgSql]: counter = " << _GpDbDriverPgSql_counter << std::endl;
 }
 
 GpDbDriverPgSql::~GpDbDriverPgSql (void) noexcept
 {
+    _GpDbDriverPgSql_counter--;
+    std::cout << "[GpDbDriverPgSql::~GpDbDriverPgSql]: counter = " << _GpDbDriverPgSql_counter << std::endl;
 }
 
-GpDbConnection::SP  GpDbDriverPgSql::NewConnection
-(
-    const GpDbConnectionMode::EnumT aMode,
-    std::string_view                aConnStr
-) const
+GpDbConnection::SP  GpDbDriverPgSql::NewConnection (std::string_view aConnStr) const
 {
     GpDbConnection::SP connection;
 
-    switch (aMode)
+    switch (Mode())
     {
         case GpDbConnectionMode::SYNC:
         {
-            connection = MakeSP<GpDbConnectionPgSql>(ConnectSync(aConnStr), aMode);
+            connection = MakeSP<GpDbConnectionPgSql>(ConnectSync(aConnStr), Mode(), GpIOEventPoller::SP::SNull());
+            connection.Vn().SetSelfWP(connection);
         } break;
         case GpDbConnectionMode::ASYNC:
         {
-            connection = MakeSP<GpDbConnectionPgSql>(ConnectAsync(aConnStr), aMode);
+            connection = MakeSP<GpDbConnectionPgSql>(ConnectAsync(aConnStr), Mode(), EventPoller());
+            connection.Vn().SetSelfWP(connection);
         } break;
         default:
         {
@@ -39,9 +51,18 @@ GpDbConnection::SP  GpDbDriverPgSql::NewConnection
     return connection;
 }
 
+GpDbQueryPrepared::CSP  GpDbDriverPgSql::Prepare (GpDbQuery::CSP aQuery) const
+{
+    GpDbQueryPreparedPgSql::SP queryPrepared = MakeSP<GpDbQueryPreparedPgSql>(aQuery);
+    queryPrepared->Prepare();
+
+    return queryPrepared;
+}
+
 PGconn* GpDbDriverPgSql::ConnectSync (std::string_view aConnStr) const
 {
-    PGconn* pgConn = PQconnectdb(aConnStr.data());
+    const std::string connStr(aConnStr);
+    PGconn* pgConn = PQconnectdb(connStr.data());
 
     THROW_GPE_COND(pgConn != nullptr, "PQconnectdb return null"_sv);
 
@@ -55,75 +76,67 @@ PGconn* GpDbDriverPgSql::ConnectSync (std::string_view aConnStr) const
     return pgConn;
 }
 
-PGconn* GpDbDriverPgSql::ConnectAsync (std::string_view /*aConnStr*/) const
+PGconn* GpDbDriverPgSql::ConnectAsync (std::string_view aConnStr) const
 {
+    //https://gist.github.com/ictlyh/6a09e8b3847199c15986d476478072e0
+
     THROW_GPE_COND
     (
         GpTaskFiber::SIsIntoFiber(),
         "Async connection available only from inside fiber task"_sv
     );
 
-    THROW_GPE_NOT_IMPLEMENTED();
+    const std::string connStr(aConnStr);
 
-    /*try
-    {
-        if (Status() != StatusTE::CLOSED)
-        {
-            THROW_GP_EXCEPTION("Failed to open connection, current status must be CLOSED, but current value "_sv
-                               + GpDbConnectionStatus::SToString(Status()));
-        }
+    //Allocate
+    PGconn* pgConn = PQconnectStart(connStr.data());
 
-        SetStatus(StatusTE::CONNECTION_IN_PROGRESS);
+    GpOnThrowStackUnwindFn<std::function<void()>> onThrowStackUnwind;
+    onThrowStackUnwind.Push([&](){if (pgConn != nullptr) {PQfinish(pgConn);}});
 
-        //Begin connection
-        PGconn* pgConn = PQconnectStart(aConnStr.data());
-        iPgConn = pgConn;
+    THROW_DBE_COND
+    (
+        pgConn != nullptr,
+        GpDbExceptionCode::CONNECTION_ERROR,
+        "Failed to allocate memory for PGconn"_sv
+    );
 
-        if (pgConn == nullptr)
-        {
-            THROW_GP_EXCEPTION("Failed to allocate memory for PGconn"_sv);
-        }
+    //Check status
+    THROW_DBE_COND
+    (
+        PQstatus(pgConn) != CONNECTION_BAD,
+        GpDbExceptionCode::CONNECTION_ERROR,
+        [&](){return "Failed to connect to DB: "_sv + std::string_view(PQerrorMessage(pgConn));}
+    );
 
-        //Check status
-        if (PQstatus(pgConn) == CONNECTION_BAD)
-        {
-            CloseAndThrow("Failed to connect. "_sv);
-        }
+    //Set non blocking
+    PQsetnonblocking(pgConn, 1);
 
-        PQsetnonblocking(pgConn, 1);
+    //Create connection task and wait
+    GpTaskFiberBarrier::SP      taskBarrier = MakeSP<GpTaskFiberBarrier>(1_cnt);
+    GpDbConnectAsyncTask::SP    task        = MakeSP<GpDbConnectAsyncTask>
+    (
+        Name() + ": async connection to DB"_sv,
+        EventPoller(),
+        pgConn,
+        taskBarrier
+    );
 
-        //Create IO device watcher and add to epoll
-        iConnIoWatcher = GpIODeviceWatcher::SP::SNew(PQsocket(pgConn));
-        GpApp::S().IONotificatorTask().Vn().AddDeviceWatcher(iConnIoWatcher);//add to epoll
+    GpTaskScheduler::SCurrentScheduler().value()->AddTaskToWaiting(task);
+    EventPoller()->AddSubscriber(task, task->Socket().Id());
 
-        //
-        GpIODeviceWatcherTaskNotifyGuard ioNotyfyGuard(iConnIoWatcher, GpTaskCoroutineCtx::SCurrentTask());
+    const auto& res = taskBarrier->Wait();
 
-        do
-        {
-            //Check
-            PostgresPollingStatusType pgPoolRes = PQconnectPoll(pgConn);
+    //Check result
+    THROW_DBE_COND
+    (
+           res.at(0).has_value()
+        && std::any_cast<GpDbConnectionStatus>(res.at(0).value()) == GpDbConnectionStatus::CONNECTED,
+        GpDbExceptionCode::CONNECTION_ERROR,
+        [&](){return "Failed to connect to DB: "_sv + std::string_view(PQerrorMessage(pgConn));}
+    );
 
-            if (pgPoolRes == PGRES_POLLING_FAILED)
-            {
-                CloseAndThrow("Failed to connect. "_sv);
-            } else if (pgPoolRes == PGRES_POLLING_OK)
-            {
-                SetStatus(StatusTE::CONNECTED);
-                return;
-            } else
-            {
-                PQconnectPoll(pgConn);
-            }
-
-            //Return to waiting
-            GpTaskCoroutineCtx::SYield(GpTaskExecRes::WAITING);
-        } while(true);
-    } catch (...)
-    {
-        Close();
-        throw;
-    }*/
+    return pgConn;
 }
 
 }//namespace GPlatform

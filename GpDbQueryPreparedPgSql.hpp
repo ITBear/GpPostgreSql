@@ -5,11 +5,11 @@
 
 namespace GPlatform {
 
-class GpDbQueryPrepPgSql
+class GpDbQueryPreparedPgSql final: public GpDbQueryPrepared
 {
 public:
-    CLASS_REMOVE_CTRS_EXCEPT_DEFAULT(GpDbQueryPrepPgSql)
-    CLASS_DECLARE_DEFAULTS(GpDbQueryPrepPgSql)
+    CLASS_REMOVE_CTRS(GpDbQueryPreparedPgSql)
+    CLASS_DECLARE_DEFAULTS(GpDbQueryPreparedPgSql)
 
     using OIDsPtrT          = GpVector<Oid>;
     using ValuesPtrT        = GpVector<const char*>;
@@ -19,10 +19,10 @@ public:
     using BinaryDataVecT    = GpVector<GpBytesArray>;
 
 public:
-                                GpDbQueryPrepPgSql      (void) noexcept;
-                                ~GpDbQueryPrepPgSql     (void) noexcept;
+                                GpDbQueryPreparedPgSql  (GpDbQuery::CSP aQuery) noexcept;
+    virtual                     ~GpDbQueryPreparedPgSql (void) noexcept override final;
 
-    void                        Prepare                 (const GpDbQuery& aQuery);
+    virtual void                Prepare                 (void) override final;
 
     const OIDsPtrT&             OIDs                    (void) const noexcept {return iOIDs;}
     const ValuesPtrT&           ValuesPtr               (void) const noexcept {return iValuesPtr;}
@@ -33,6 +33,8 @@ private:
     void                        FillData                (const GpDbQueryValType::EnumT  aValueType,
                                                          const count_t                  aValueId,
                                                          const GpDbQuery&               aQuery);
+
+
 
 private:
     OIDsPtrT                    iOIDs;

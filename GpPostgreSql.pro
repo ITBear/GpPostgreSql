@@ -15,6 +15,7 @@ include(../../QtGlobalPro.pri)
 os_windows{
 	GP_CORE_LIB_V			= 2
 	GP_DB_CLIENT_LIB_V		= 0
+	GP_NETWORK_LIB_V		= 0
 }
 
 os_linux{
@@ -22,23 +23,29 @@ os_linux{
 
 LIBS += -lGpCore2$$TARGET_POSTFIX$$GP_CORE_LIB_V
 LIBS += -lGpDbClient$$TARGET_POSTFIX$$GP_DB_CLIENT_LIB_V
+LIBS += -lGpNetwork$$TARGET_POSTFIX$$GP_NETWORK_LIB_V
 LIBS += -lpq
+
 #------------------------------ LIBS END ---------------------------------
 
 SOURCES += \
 	GpDbArrayBuilder.cpp \
+	GpDbConnectAsyncTask.cpp \
 	GpDbConnectionPgSql.cpp \
 	GpDbDriverFactoryPgSql.cpp \
 	GpDbDriverPgSql.cpp \
-	GpDbQueryPrepPgSql.cpp \
+	GpDbQueryAsyncTask.cpp \
+	GpDbQueryPreparedPgSql.cpp \
 	GpDbQueryResPgSql.cpp
 
 HEADERS += \
     GpDbArrayBuilder.hpp \
+    GpDbConnectAsyncTask.hpp \
     GpDbConnectionPgSql.hpp \
     GpDbDriverFactoryPgSql.hpp \
     GpDbDriverPgSql.hpp \
-    GpDbQueryPrepPgSql.hpp \
+    GpDbQueryAsyncTask.hpp \
+    GpDbQueryPreparedPgSql.hpp \
     GpDbQueryResPgSql.hpp \
     GpPostgreSql_global.hpp \
     GpPostgreSql.hpp

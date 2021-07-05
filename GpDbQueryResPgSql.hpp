@@ -15,6 +15,9 @@ public:
                                 GpDbQueryResPgSql   (PGresult* aPgResult);
     virtual                     ~GpDbQueryResPgSql  (void) noexcept override final;
 
+    void                        Process             (const count_t  aMinResultRowsCount,
+                                                     PGconn*        aPgConn);
+
     virtual void                Clear               (void) override final;
 
     [[nodiscard]]

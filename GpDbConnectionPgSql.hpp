@@ -1,11 +1,18 @@
 #pragma once
 
 #include "GpPostgreSql_global.hpp"
+#include "GpDbQueryPreparedPgSql.hpp"
 #include <postgresql/libpq-fe.h>
 
 namespace GPlatform {
 
-class GpDbConnectionPgSql final: public GpDbConnection
+enum class GpPosrgresQueryResultType
+{
+    TEXT    = 0,
+    BINARY  = 1
+};
+
+class GpDbConnectionPgSql final: public GpDbConnection      
 {
 public:
     CLASS_REMOVE_CTRS(GpDbConnectionPgSql)
@@ -14,18 +21,18 @@ public:
     using IsolationLevelNamesT = std::array<std::string_view, GpDbTransactionIsolation::SCount().Value()>;
 
 public:
-                                GpDbConnectionPgSql     (PGconn*        aPgConn,
-                                                         const ModeTE   aMode) noexcept;
+                                GpDbConnectionPgSql     (PGconn*                aPgConn,
+                                                         const ModeTE           aMode,
+                                                         GpIOEventPoller::WP    aEventPoller) noexcept;
     virtual                     ~GpDbConnectionPgSql    (void) noexcept override final;
 
+    GpSocketAddr::SocketIdT     SocketId                (void) const {return PQsocket(iPgConn);}
+    PGconn*                     PgConn                  (void) {return iPgConn;}
+
     virtual void                Close                   (void) override final;
-    virtual GpDbQueryRes::SP    Execute                 (const GpDbQuery&   aQuery,
-                                                         const count_t      aMinResultRowsCount) override final;
-    virtual GpDbQueryRes::SP    Execute                 (std::string_view   aSQL,
-                                                         const count_t      aMinResultRowsCount) override final;
-    virtual GpDbQuery::SP       NewQuery                (std::string_view aQueryStr) const override final;
-    virtual GpDbQuery::SP       NewQuery                (std::string_view                   aQueryStr,
-                                                         const GpDbQuery::ValuesTypesVecT&  aValuesTypes) const override final;
+    virtual GpDbQueryRes::SP    Execute                 (GpDbQueryPrepared::CSP aQueryPrepared,
+                                                         const count_t          aMinResultRowsCount) override final;
+    virtual bool                Validate                (void) const noexcept override final;
 
 protected:
     virtual void                OnBeginTransaction      (GpDbTransactionIsolation::EnumT aIsolationLevel) override final;
@@ -33,24 +40,20 @@ protected:
     virtual void                OnRollbackTransaction   (void) override final;
 
 private:
-    GpDbQueryRes::SP            ExecuteSync             (const GpDbQuery&   aQuery,
-                                                         const count_t      aMinResultRowsCount);
-    GpDbQueryRes::SP            ExecuteAsync            (const GpDbQuery&   aQuery,
-                                                         const count_t      aMinResultRowsCount);
-    GpDbQueryRes::SP            ExecuteSync             (std::string_view   aSQL,
-                                                         const count_t      aMinResultRowsCount);
-    GpDbQueryRes::SP            ExecuteAsync            (std::string_view   aSQL,
-                                                         const count_t      aMinResultRowsCount);
-
-    GpDbQueryRes::SP            ProcessResult           (PGresult*          aPgResult,
-                                                         const count_t      aMinResultRowsCount);
+    GpDbQueryRes::SP            ExecuteSync             (GpDbQueryPrepared::CSP aQueryPrepared,
+                                                         const count_t          aMinResultRowsCount);
+    GpDbQueryRes::SP            ExecuteAsync            (GpDbQueryPrepared::CSP aQueryPrepared,
+                                                         const count_t          aMinResultRowsCount);
+    /*GpDbQueryRes::SP          ExecuteSync             (std::string_view       aSQL,
+                                                         const count_t          aMinResultRowsCount);
+    GpDbQueryRes::SP            ExecuteAsync            (std::string_view       aSQL,
+                                                         const count_t          aMinResultRowsCount);*/
 
     void                        ClosePgConn             (void) noexcept;
 
 private:
     PGconn*                     iPgConn = nullptr;
     static IsolationLevelNamesT sIsolationLevelNames;
-
 };
 
 }//namespace GPlatform

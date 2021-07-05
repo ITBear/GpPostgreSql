@@ -1,22 +1,25 @@
-#include "GpDbQueryPrepPgSql.hpp"
+#include "GpDbQueryPreparedPgSql.hpp"
 #include "GpDbArrayBuilder.hpp"
 
 namespace GPlatform {
 
-GpDbQueryPrepPgSql::GpDbQueryPrepPgSql (void) noexcept
+GpDbQueryPreparedPgSql::GpDbQueryPreparedPgSql (GpDbQuery::CSP aQuery) noexcept:
+GpDbQueryPrepared(std::move(aQuery))
 {
 }
 
-GpDbQueryPrepPgSql::~GpDbQueryPrepPgSql (void) noexcept
+GpDbQueryPreparedPgSql::~GpDbQueryPreparedPgSql (void) noexcept
 {
 }
 
-void    GpDbQueryPrepPgSql::Prepare (const GpDbQuery& aQuery)
+void    GpDbQueryPreparedPgSql::Prepare (void)
 {
-    const GpDbQuery::ValuesTypesVecT& valuesTypes = aQuery.ValuesTypes();
+    const GpDbQuery& query = Query().VC();
+
+    const GpDbQuery::ValuesTypesVecT& valuesTypes = query.ValuesTypes();
 
     const size_t valuesTypesCount   = valuesTypes.size();
-    const size_t valuesCount        = aQuery.Values().size();
+    const size_t valuesCount        = query.Values().size();
 
     THROW_GPE_COND
     (
@@ -34,11 +37,11 @@ void    GpDbQueryPrepPgSql::Prepare (const GpDbQuery& aQuery)
     for (count_t id = 0_cnt; id < count; ++id)
     {
         const GpDbQueryValType::EnumT valueType = valuesTypes.at(id.As<size_t>());
-        FillData(valueType, id, aQuery);
+        FillData(valueType, id, query);
     }
 }
 
-void    GpDbQueryPrepPgSql::FillData
+void    GpDbQueryPreparedPgSql::FillData
 (
     const GpDbQueryValType::EnumT   aValueType,
     const count_t                   aValueId,

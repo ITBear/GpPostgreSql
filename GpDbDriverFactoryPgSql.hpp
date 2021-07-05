@@ -11,10 +11,11 @@ public:
     CLASS_DECLARE_DEFAULTS(GpDbDriverFactoryPgSql)
 
 public:
-                                GpDbDriverFactoryPgSql  (void);
-    virtual                     ~GpDbDriverFactoryPgSql (void) noexcept override final;
+                                    GpDbDriverFactoryPgSql  (void);
+    virtual                         ~GpDbDriverFactoryPgSql (void) noexcept override final;
 
-    virtual GpDbDriver::SP      NewInstance             (void) const override final;
+    virtual GpDbDriver::SP          NewInstance             (const GpDbConnectionMode::EnumT    aMode,
+                                                             GpIOEventPoller::WP                aEventPoller) const override final;
 };
 
 }//namespace GPlatform
