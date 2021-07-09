@@ -7,7 +7,7 @@ namespace GPlatform {
 class GPPOSTGRESQL_API GpDbDriverFactoryPgSql final: public GpDbDriverFactory
 {
 public:
-    CLASS_REMOVE_CTRS_EXCEPT_DEFAULT(GpDbDriverFactoryPgSql)
+    CLASS_REMOVE_CTRS_MOVE_COPY(GpDbDriverFactoryPgSql)
     CLASS_DECLARE_DEFAULTS(GpDbDriverFactoryPgSql)
 
 public:

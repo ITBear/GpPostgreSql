@@ -10,7 +10,7 @@ namespace GPlatform {
 class GpDbQueryAsyncTask final: public GpSocketTask
 {
 public:
-    CLASS_REMOVE_CTRS(GpDbQueryAsyncTask)
+    CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbQueryAsyncTask)
     CLASS_DECLARE_DEFAULTS(GpDbQueryAsyncTask)
 
 public:

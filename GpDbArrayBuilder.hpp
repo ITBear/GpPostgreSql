@@ -10,7 +10,7 @@ namespace GPlatform {
 class GpDbArrayBuilder
 {
 public:
-    CLASS_REMOVE_CTRS(GpDbArrayBuilder)
+    CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbArrayBuilder)
 
 public:
     static std::tuple<Oid, GpBytesArray>    SBuild  (const GpVector<std::string>& aArray);

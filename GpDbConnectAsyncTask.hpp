@@ -9,7 +9,7 @@ namespace GPlatform {
 class GpDbConnectAsyncTask final: public GpSocketTask
 {
 public:
-    CLASS_REMOVE_CTRS(GpDbConnectAsyncTask)
+    CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbConnectAsyncTask)
     CLASS_DECLARE_DEFAULTS(GpDbConnectAsyncTask)
 
 public:

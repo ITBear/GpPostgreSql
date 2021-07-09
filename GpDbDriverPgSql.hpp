@@ -8,7 +8,7 @@ namespace GPlatform {
 class GpDbDriverPgSql final: public GpDbDriver
 {
 public:
-    CLASS_REMOVE_CTRS_EXCEPT_DEFAULT(GpDbDriverPgSql)
+    CLASS_REMOVE_CTRS_MOVE_COPY(GpDbDriverPgSql)
     CLASS_DECLARE_DEFAULTS(GpDbDriverPgSql)
     CLASS_TAG(THREAD_SAFE)
 

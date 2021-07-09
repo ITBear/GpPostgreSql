@@ -8,7 +8,7 @@ namespace GPlatform {
 class GpDbQueryPreparedPgSql final: public GpDbQueryPrepared
 {
 public:
-    CLASS_REMOVE_CTRS(GpDbQueryPreparedPgSql)
+    CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbQueryPreparedPgSql)
     CLASS_DECLARE_DEFAULTS(GpDbQueryPreparedPgSql)
 
     using OIDsPtrT          = GpVector<Oid>;

@@ -8,7 +8,7 @@ namespace GPlatform {
 class GpDbQueryResPgSql final: public GpDbQueryRes
 {
 public:
-    CLASS_REMOVE_CTRS(GpDbQueryResPgSql)
+    CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbQueryResPgSql)
     CLASS_DECLARE_DEFAULTS(GpDbQueryResPgSql)
 
 public:

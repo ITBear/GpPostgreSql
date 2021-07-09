@@ -15,7 +15,7 @@ enum class GpPosrgresQueryResultType
 class GpDbConnectionPgSql final: public GpDbConnection      
 {
 public:
-    CLASS_REMOVE_CTRS(GpDbConnectionPgSql)
+    CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbConnectionPgSql)
     CLASS_DECLARE_DEFAULTS(GpDbConnectionPgSql)
 
     using IsolationLevelNamesT = std::array<std::string_view, GpDbTransactionIsolation::SCount().Value()>;
