@@ -82,8 +82,7 @@ void    GpDbQueryResPgSql::Process
     if (errMsg.length() > 0)
     {
         Clear();
-
-        THROW_GPE(errMsg + ": "_sv + std::string_view(PQerrorMessage(aPgConn)));
+        ThrowDbEx(errMsg, aPgConn);
     }
 
     if (aMinResultRowsCount > 0_cnt)
@@ -442,6 +441,27 @@ void    GpDbQueryResPgSql::ClearPgSql (void) noexcept
         PQclear(iPgResult);
         iPgResult = nullptr;
     }
+}
+
+void    GpDbQueryResPgSql::ThrowDbEx
+(
+    std::string_view    aMsg,
+    PGconn*             aPgConn
+)
+{
+    std::string_view            message = std::string_view(PQerrorMessage(aPgConn));
+    GpDbExceptionCode::EnumT    code    = GpDbExceptionCode::QUERY_ERROR;
+
+    if (message.find("duplicate key"_sv) != std::string_view::npos)
+    {
+        code = GpDbExceptionCode::QUERY_DUPLICATE_KEY;
+    }
+
+    THROW_DBE
+    (
+        code,
+        aMsg + ": "_sv + message
+    );
 }
 
 }//namespace GPlatform

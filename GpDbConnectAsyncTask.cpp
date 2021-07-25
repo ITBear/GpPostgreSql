@@ -4,8 +4,6 @@
 
 namespace GPlatform {
 
-static int _GpDbConnectAsyncTask_counter = 0;
-
 GpDbConnectAsyncTask::GpDbConnectAsyncTask
 (
     std::string_view        aName,
@@ -22,8 +20,6 @@ GpSocketTask
 iPGconn(aPGconn),
 iTaskBarrier(std::move(aTaskBarrier))
 {
-    _GpDbConnectAsyncTask_counter++;
-    std::cout << "[GpDbConnectAsyncTask::GpDbConnectAsyncTask]: counter = " << _GpDbConnectAsyncTask_counter << std::endl;
 }
 
 GpDbConnectAsyncTask::~GpDbConnectAsyncTask (void) noexcept
@@ -33,9 +29,6 @@ GpDbConnectAsyncTask::~GpDbConnectAsyncTask (void) noexcept
         iTaskBarrier->Release(std::nullopt);
         iTaskBarrier.Clear();
     }
-
-    _GpDbConnectAsyncTask_counter--;
-    std::cout << "[GpDbConnectAsyncTask::~GpDbConnectAsyncTask]: counter = " << _GpDbConnectAsyncTask_counter << std::endl;
 }
 
 GpTask::ResT    GpDbConnectAsyncTask::OnSockReadyToRead (GpSocket& /*aSocket*/)

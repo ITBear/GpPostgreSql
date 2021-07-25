@@ -5,8 +5,6 @@
 
 namespace GPlatform {
 
-static int _GpDbQueryAsyncTask_counter = 0;
-
 GpDbQueryAsyncTask::GpDbQueryAsyncTask
 (
     std::string_view        aName,
@@ -26,8 +24,6 @@ iQueryPrepared(std::move(aQueryPrepared)),
 iMinResultRowsCount(aMinResultRowsCount),
 iTaskBarrier(std::move(aTaskBarrier))
 {
-    _GpDbQueryAsyncTask_counter++;
-    std::cout << "[GpDbQueryAsyncTask::GpDbQueryAsyncTask]: counter = "_sv << _GpDbQueryAsyncTask_counter << std::endl;
 }
 
 GpDbQueryAsyncTask::~GpDbQueryAsyncTask (void) noexcept
@@ -37,9 +33,6 @@ GpDbQueryAsyncTask::~GpDbQueryAsyncTask (void) noexcept
         iTaskBarrier->Release(std::nullopt);
         iTaskBarrier.Clear();
     }
-
-    _GpDbQueryAsyncTask_counter--;
-    std::cout << "[GpDbQueryAsyncTask::~GpDbQueryAsyncTask]: counter = "_sv << _GpDbQueryAsyncTask_counter << std::endl;
 }
 
 GpTask::ResT    GpDbQueryAsyncTask::OnSockReadyToRead (GpSocket& /*aSocket*/)

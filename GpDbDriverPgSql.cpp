@@ -7,8 +7,6 @@
 
 namespace GPlatform {
 
-static int _GpDbDriverPgSql_counter = 0;
-
 GpDbDriverPgSql::GpDbDriverPgSql
 (
     const GpDbConnectionMode::EnumT aMode,
@@ -16,14 +14,10 @@ GpDbDriverPgSql::GpDbDriverPgSql
 ):
 GpDbDriver("postgresql"_sv, aMode, aEventPoller)
 {
-    _GpDbDriverPgSql_counter++;
-    std::cout << "[GpDbDriverPgSql::GpDbDriverPgSql]: counter = " << _GpDbDriverPgSql_counter << std::endl;
 }
 
 GpDbDriverPgSql::~GpDbDriverPgSql (void) noexcept
 {
-    _GpDbDriverPgSql_counter--;
-    std::cout << "[GpDbDriverPgSql::~GpDbDriverPgSql]: counter = " << _GpDbDriverPgSql_counter << std::endl;
 }
 
 GpDbConnection::SP  GpDbDriverPgSql::NewConnection (std::string_view aConnStr) const

@@ -87,6 +87,8 @@ public:
 
 private:
     void                        ClearPgSql          (void) noexcept;
+    void                        ThrowDbEx           (std::string_view   aMsg,
+                                                     PGconn*            aPgConn);
 
 private:
     PGresult*                   iPgResult = nullptr;

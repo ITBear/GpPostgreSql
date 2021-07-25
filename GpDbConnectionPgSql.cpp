@@ -9,8 +9,6 @@
 
 namespace GPlatform {
 
-static int _GpDbConnectionPgSql_counter = 0;
-
 GpDbConnectionPgSql::IsolationLevelNamesT   GpDbConnectionPgSql::sIsolationLevelNames =
 {
     "SERIALIZABLE"_sv,
@@ -28,15 +26,10 @@ GpDbConnectionPgSql::GpDbConnectionPgSql
 GpDbConnection(StatusTE::CONNECTED, aMode, aEventPoller),
 iPgConn(aPgConn)
 {
-    _GpDbConnectionPgSql_counter++;
-    std::cout << "[GpDbConnectionPgSql::GpDbConnectionPgSql]: counter = " << _GpDbConnectionPgSql_counter << std::endl;
 }
 
 GpDbConnectionPgSql::~GpDbConnectionPgSql (void) noexcept
 {
-    _GpDbConnectionPgSql_counter--;
-    std::cout << "[GpDbConnectionPgSql::~GpDbConnectionPgSql]: counter = " << _GpDbConnectionPgSql_counter << std::endl;
-
     ClosePgConn();
 }
 
