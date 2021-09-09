@@ -12,7 +12,7 @@ enum class GpPosrgresQueryResultType
     BINARY  = 1
 };
 
-class GpDbConnectionPgSql final: public GpDbConnection      
+class GpDbConnectionPgSql final: public GpDbConnection
 {
 public:
     CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbConnectionPgSql)
@@ -32,6 +32,7 @@ public:
     virtual void                Close                   (void) override final;
     virtual GpDbQueryRes::SP    Execute                 (GpDbQueryPrepared::CSP aQueryPrepared,
                                                          const count_t          aMinResultRowsCount) override final;
+    virtual std::string         StrEscape               (std::string_view aStr) const override final;
     virtual bool                Validate                (void) const noexcept override final;
 
 protected:

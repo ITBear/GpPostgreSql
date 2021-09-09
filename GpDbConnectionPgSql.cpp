@@ -64,6 +64,22 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::Execute
     }
 }
 
+std::string GpDbConnectionPgSql::StrEscape (std::string_view aStr) const
+{
+    PGconn* pgConn = static_cast<PGconn*>(iPgConn);
+
+    if (pgConn == nullptr)
+    {
+        return std::string();
+    }
+
+    char* escapedStrPtr = PQescapeLiteral(pgConn, aStr.data(), aStr.size());
+    std::string escapedStr(escapedStrPtr);
+    PQfreemem(escapedStrPtr);
+
+    return escapedStr;
+}
+
 /*GpDbQueryRes::SP  GpDbConnectionPgSql::Execute
 (
     std::string_view    aSQL,
