@@ -1,8 +1,6 @@
 #include "GpDbQueryAsyncTask.hpp"
 #include "GpDbQueryResPgSql.hpp"
 
-#include <iostream>
-
 namespace GPlatform {
 
 GpDbQueryAsyncTask::GpDbQueryAsyncTask

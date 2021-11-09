@@ -3,8 +3,6 @@
 #include "GpDbConnectAsyncTask.hpp"
 #include "GpDbQueryPreparedPgSql.hpp"
 
-#include <iostream>
-
 namespace GPlatform {
 
 GpDbDriverPgSql::GpDbDriverPgSql

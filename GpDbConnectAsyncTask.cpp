@@ -1,7 +1,5 @@
 #include "GpDbConnectAsyncTask.hpp"
 
-#include <iostream>
-
 namespace GPlatform {
 
 GpDbConnectAsyncTask::GpDbConnectAsyncTask
