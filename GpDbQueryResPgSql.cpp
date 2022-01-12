@@ -351,6 +351,7 @@ GpUUID  GpDbQueryResPgSql::GetUUID
             aOnNullValue.has_value(),
             [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
         );
+
         return aOnNullValue.value();
     }
 

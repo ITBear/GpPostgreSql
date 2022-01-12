@@ -3,8 +3,6 @@
 #include "GpDbQueryResPgSql.hpp"
 #include "GpDbQueryAsyncTask.hpp"
 
-#include <iostream>
-
 //https://gist.github.com/ictlyh/12fe787ec265b33fd7e4b0bd08bc27cb
 
 namespace GPlatform {
@@ -44,8 +42,8 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::Execute
     const count_t           aMinResultRowsCount
 )
 {
-    //TODO: reimplement with logger listener
-    std::cout << "[GpDbConnectionPgSql::Execute]: SQL '" << aQueryPrepared.VC().Query().VC().QueryStr() << "'" << std::endl;
+    const GpUUID taskGuid = GPlatform::GpTaskFiber::SGuid();
+    GP_LOG_INFO("[GpDbConnectionPgSql::Execute]: SQL '"_sv + aQueryPrepared.VC().Query().VC().QueryStr() + "'"_sv, taskGuid);
 
     switch (Mode())
     {
@@ -87,7 +85,8 @@ std::string GpDbConnectionPgSql::StrEscape (std::string_view aStr) const
 )
 {
     //TODO: reimplement with logger listener
-    std::cout << "[GpDbConnectionPgSql::Execute]: SQL '" << aSQL << "'" << std::endl;
+    const GpUUID taskGuid = GPlatform::GpTaskFiber::SGuid();
+    GP_LOG_INFO("[GpDbConnectionPgSql::Execute]: SQL '"_sv + aSQL + "'"_sv, taskGuid);
 
     switch (Mode())
     {
